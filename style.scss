@@ -1,0 +1,127 @@
+.wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #444446;
+}
+
+.form {
+  border-radius: 20px;
+  background-color: #1F1F1F;
+  width: 30%;
+  padding: 30px;
+}
+
+.form__range {
+}
+
+.range-bar {
+}
+
+.range-bar__line_fill {
+  position: relative;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  height: 12px;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  border-radius: 30px;
+  background-color: #FDC840;
+}
+
+.range-bar__dot {
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  border-radius: 50%;
+  overflow: hidden;
+  background-color: #fff;
+  box-shadow: 0 4px 4px 0 #00000066;
+  transform: translate(-15px, -50%);
+  transition: box-shadow 0.19s ease;
+  &:active {
+    box-shadow: 4px 4px 5px 0 rgba(255, 255, 255, 0.5);
+  }
+  @media (hover: hover) {
+      &:hover {
+        cursor: pointer;
+      }
+  }
+}
+
+.min-point {
+  z-index: 2;
+}
+
+.max-point {
+  z-index: 1;
+}
+
+.min-cover {
+  position: absolute;
+  display: block;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background-color: #FFECBB;
+  border-radius: 30px;
+}
+
+.max-cover {
+  position: absolute;
+  z-index: 1;
+  display: block;
+  right: 0;
+  top: 0;
+  width: 0;
+  height: 100%;
+  background-color: #FFECBB;
+  border-radius: 30px;
+}
+
+.range-bar__enter {
+  display: flex;
+  justify-content: space-between;
+  grid-gap: 10px;
+  margin-bottom: 25px;
+}
+
+.range-bar__enter_input {
+  width: 100%;
+  border-radius: 5px;
+  padding: 5px 25px 5px 10px;
+  font-size: 24px;
+  color: #fff;
+  background-color: #6A6A6A;
+}
+
+.range-bar__values {
+  flex: 0 1 100px;
+  position: relative;
+
+  &:after {
+    content: '₽';
+    position: absolute;
+    z-index: 1;
+    display: inline-block;
+    right: 10px;
+    top: 50%;
+    transform: translate(0, -50%);
+    font-size: 21px;
+    color: #fff;
+  }
+}
+
+.range-bar__enter_min {
+}
+
+.range-bar__enter_max {
+}

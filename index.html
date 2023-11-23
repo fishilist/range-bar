@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="./null.css">
+    <link rel="stylesheet" href="./style.css">
+    <title>Range bar</title>
+</head>
+<body>
+<div class="wrapper">
+    <form action="#" class="form">
+        <div data-min="-10"
+             data-max="100"
+             data-start="-5, 58"
+             class="form__range range-bar">
+            <div class="range-bar__enter">
+                <div class="range-bar__values">
+                    <input type="number" class="range-bar__enter_input range-bar__enter_min">
+                </div>
+                <div class="range-bar__values">
+                    <input type="number" class="range-bar__enter_input range-bar__enter_max">
+                </div>
+            </div>
+            <div class="range-bar__line_fill">
+                <div class="min-cover"></div>
+                <div class="max-cover"></div>
+                <span class="range-bar__dot min-point"></span>
+                <span class="range-bar__dot max-point"></span>
+            </div>
+        </div>
+    </form>
+</div>
+</body>
+<script src="./script.js"></script>
+</html>
