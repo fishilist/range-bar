@@ -39,9 +39,12 @@
   top: 50%;
   width: 30px;
   height: 30px;
-  display: inline-block;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   border-radius: 50%;
   overflow: hidden;
+  font-size: 12px;
   background-color: #fff;
   box-shadow: 0 4px 4px 0 #00000066;
   transform: translate(-15px, -50%);

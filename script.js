@@ -9,12 +9,14 @@ const inputMaxValue = document.querySelector('.range-bar__enter_max')
 const upperLineRange = document.querySelector('.range-bar__line_fill')
 const range = initRangeBar()
 
+// Init range ==============================================================
 function isMobileDevice() {
     return 'ontouchstart' in window ||
         (window.DocumentTouch && document instanceof window.DocumentTouch) ||
         navigator.maxTouchPoints > 0 ||
         window.navigator.msMaxTouchPoints > 0;
 }
+
 function initRangeBar() {
     // get 2 values from data-start
     const minmax = rangeBar.dataset.start.split(",")
@@ -59,33 +61,6 @@ function initRangeBar() {
     }
 }
 
-if (isMobile) {
-    minPoint.addEventListener("touchstart", touchDownHandler)
-    maxPoint.addEventListener("touchstart", touchDownHandler)
-} else {
-    minPoint.addEventListener("mousedown", mouseDownHandler)
-    maxPoint.addEventListener("mousedown", mouseDownHandler)
-}
-
-initPoints()
-inputMinValue.addEventListener("change", changeMinValueHandler)
-inputMaxValue.addEventListener("change", changeMaxValueHandler)
-
-
-function touchDownHandler(event) {
-    if (event.target === minPoint) {
-        document.addEventListener('touchmove', onMouseMove);
-    } else {
-        document.addEventListener('touchmove', onMouseMoveMax);
-    }
-
-    document.ontouchend = () => {
-        document.removeEventListener('touchmove', onMouseMove)
-        document.removeEventListener('touchmove', onMouseMoveMax)
-        document.ontouchend = null
-    }
-}
-
 function initPoints() {
     const rangeNumbers = range.max - range.min;
     const startPositionRangeMin = range.currentMin - range.min;
@@ -100,81 +75,85 @@ function initPoints() {
     maxCover.style.width = offsetMax + '%'
 }
 
-function mouseDownHandler(event) {
-    if (event.target === minPoint) {
-        //touchmove
-        document.addEventListener('mousemove', onMouseMove);
-        //document.addEventListener('touchmove', onMouseMove);
+initPoints()
+// =========================================================================
+
+// Events ==================================================================
+const eventHoldDownName = isMobile ? "touchstart" : "mousedown";
+minPoint.addEventListener(eventHoldDownName, holdDownHandler)
+maxPoint.addEventListener(eventHoldDownName, holdDownHandler)
+// =========================================================================
+
+// Listener when hold down the key on points ===============================
+function holdDownHandler(event) {
+    const point = event.target
+    point.ondragstart = () => false
+
+    // fix target point for mouses!
+    const onCursorMove = (event) => {
+        movePoint(point, event)
+    }
+
+    const moveEventName = isMobile ? "touchmove" : "mousemove"
+    const upEventName = isMobile ? "ontouchend" : "onmouseup"
+
+    document.addEventListener(moveEventName, onCursorMove);
+    document[upEventName] = () => {
+        document.removeEventListener(moveEventName, onCursorMove);
+        document[upEventName] = null
+    }
+}
+
+const movePoint = (point, event) => {
+    const startRangeX = upperLineRange.getBoundingClientRect().x;
+    const widthRange = upperLineRange.clientWidth;
+    const startNextPoint = maxPoint.getBoundingClientRect().x - startRangeX;
+    const startPrevPoint = minPoint.getBoundingClientRect().x - startRangeX + minPoint.clientWidth;
+
+    let pointPosition; // point position in 'px' relative to range-bar on the left side
+
+    if (isMobile) {
+        pointPosition = Math.trunc(event.touches[0].clientX - startRangeX)
     } else {
-        document.addEventListener('mousemove', onMouseMoveMax);
-        //document.addEventListener('touchmove', onMouseMoveMax);
+        pointPosition = Math.trunc(event.clientX - startRangeX)
     }
 
-    // document.ontouchend = function onTouchUp() {
-    //     document.removeEventListener('touchmove', onMouseMove)
-    //     document.removeEventListener('touchmove', onMouseMoveMax)
-    //     document.ontouchend = null
-    //     document.removeEventListener('mousemove', onMouseMove)
-    //     document.removeEventListener('mousemove', onMouseMoveMax)
-    //     document.onmouseup = null
-    // }
-    document.onmouseup = () => {
-        document.removeEventListener('mousemove', onMouseMove)
-        document.removeEventListener('mousemove', onMouseMoveMax)
-        document.onmouseup = null
-    }
+    if ((point === minPoint) && (pointPosition < 0 || pointPosition > widthRange || pointPosition > startNextPoint)) return;
+    else if ((point === maxPoint) && (pointPosition < 0 || pointPosition > widthRange || pointPosition < startPrevPoint)) return;
+
+    // point offset in '%' relative to range-bar on the left side
+    let offset = Math.trunc(pointPosition / widthRange * 100);
+    setPosition(offset, point)
 }
-
-const onMouseMove = (event) => {
-    const startUnderlineX = upperLineRange.getBoundingClientRect().x;
-    const widthUnderLine = upperLineRange.clientWidth;
-    const startMaxPoint = maxPoint.getBoundingClientRect().x - startUnderlineX;
-
-    let offsetPx = Math.trunc(event.clientX - startUnderlineX); // px
-    if (offsetPx === undefined || isNaN(offsetPx)) {
-        offsetPx = Math.trunc(event.touches[0].clientX - startUnderlineX); // px
-    }
-    if (offsetPx <= 0 || offsetPx > widthUnderLine || offsetPx >= startMaxPoint) return;
-
-    let offset = Math.trunc(offsetPx / widthUnderLine * 100); // NaN
-    let step = (range.max - range.min) / 100;
+const setPosition = (offset, point) => {
+    if (offset > 100) return;
+    const step = (range.max - range.min) / 100;
     const value = Math.trunc(range.min + step * offset)
-    range.currentMin = value;
-    inputMinValue.value = value
-
-    minPoint.style.left = offset + '%';
-    minCover.style.right = (100 - offset) + '%'
-    minCover.style.width = offset + '%'
-}
-
-const onMouseMoveMax = (event) => {
-    const startUnderlineX = upperLineRange.getBoundingClientRect().x;
-    const widthUnderLine = upperLineRange.clientWidth;
-    const startMinPoint = minPoint.getBoundingClientRect().x - startUnderlineX + minPoint.clientWidth;
-
-    let offsetPx = Math.trunc(event.clientX - startUnderlineX); // px
-    if (offsetPx === undefined || isNaN(offsetPx)) {
-        offsetPx = Math.trunc(event.touches[0].clientX - startUnderlineX); // px
+    if (point === minPoint) {
+        range.currentMin = value;
+        inputMinValue.value = value
+        minPoint.style.left = offset + '%';
+        minCover.style.width = offset + '%'
+    } else if (point === maxPoint) {
+        range.currentMax = value;
+        inputMaxValue.value = value
+        maxPoint.style.left = offset + '%';
+        maxCover.style.width = (100 - offset) + '%'
     }
-    if (offsetPx <= 0 || offsetPx > widthUnderLine || offsetPx <= startMinPoint) return;
-    const offset = Math.trunc(offsetPx / widthUnderLine * 100);
-
-    let step = (range.max - range.min) / 100;
-    const value = Math.trunc(range.min + step * offset)
-    inputMaxValue.value = value
-    range.currentMax = value;
-
-    maxPoint.style.left = offset + '%';
-    maxCover.style.width = (100 - offset) + '%'
 }
+
+// Value Inputs ============================================================
+inputMinValue.addEventListener("change", changeMinValueHandler)
+inputMaxValue.addEventListener("change", changeMaxValueHandler)
 
 function changeMinValueHandler(event) {
-    let value = Number(event.target.value)
+    let value = parseInt(event.target.value)
+    if (isNaN(value)) return;
+
     if (value < range.min) {
         value = range.min
         inputMinValue.value = value
-    }
-    if (value > range.currentMax) {
+    } else if (value > range.currentMax) {
         value = range.currentMax
         inputMinValue.value = value
     }
@@ -183,7 +162,9 @@ function changeMinValueHandler(event) {
 }
 
 function changeMaxValueHandler(event) {
-    let value = Number(event.target.value)
+    let value = parseInt(event.target.value)
+    if (isNaN(value)) return;
+
     if (value > range.max) {
         value = range.max
         inputMaxValue.value = value
@@ -195,3 +176,5 @@ function changeMaxValueHandler(event) {
     range.currentMax = value
     initPoints()
 }
+
+// =========================================================================
